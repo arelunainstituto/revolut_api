@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revolut API - AreLuna</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏦 Revolut API Dashboard</h1>
+            <div id="auth-section">
+                <div id="login-form" class="auth-card">
+                    <h2>Login</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Usuário:</label>
+                            <input type="text" id="username" name="username" required placeholder="test">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Senha:</label>
+                            <input type="password" id="password" name="password" required placeholder="test123">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                    </form>
+                </div>
+                <div id="user-info" class="auth-card hidden">
+                    <div class="user-header">
+                        <span id="user-name"></span>
+                        <button id="logoutBtn" class="btn btn-secondary">Sair</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-content" class="hidden">
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="config">🔑 Configuração</button>
+                <button class="tab-btn" data-tab="accounts">📁 Contas</button>
+                <button class="tab-btn" data-tab="transactions">💸 Transações</button>
+                <button class="tab-btn" data-tab="payments">Pagamentos</button>
+                <button class="tab-btn" data-tab="counterparties">Contrapartes</button>
+                <button class="tab-btn" data-tab="exchange">Taxa de Câmbio</button>
+            </nav>
+
+            <div class="tab-content">
+                <!-- Configuration Tab -->
+                <div id="config" class="tab-pane active">
+                    <h2>🔑 Configuração</h2>
+                    <p class="subtitle">Integração com Revolut Business API usando autenticação X.509</p>
+                    
+                    <form id="configForm" class="form-card">
+                        <div class="form-group">
+                            <label for="clientId">Client ID:</label>
+                            <input type="text" id="clientId" placeholder="Digite o Client ID da Revolut">
+                            <small>Obtido após fazer upload do certificado no portal da Revolut</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="privateKey">Private Key (PEM):</label>
+                            <textarea id="privateKey" rows="8" placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;...&#10;-----END RSA PRIVATE KEY-----"></textarea>
+                            <small>Cole aqui a chave privada PEM gerada</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="oauthRedirect">OAuth Redirect URI (opcional):</label>
+                            <input type="text" id="oauthRedirect" placeholder="https://seu-dominio.com/callback">
+                            <small>URI de redirecionamento para OAuth (opcional)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="sandboxMode" checked>
+                                <span>Modo Sandbox (ambiente de testes)</span>
+                            </label>
+                            <small>Marque para usar o ambiente de sandbox da Revolut</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">🔌 Testar Conexão</button>
+                    </form>
+                    
+                    <div id="configResult" class="result-card hidden"></div>
+                    
+                    <div class="info-card">
+                        <h3>📖 Como obter certificados X.509:</h3>
+                        <ol>
+                            <li>Acesse o <a href="https://business.revolut.com" target="_blank">Developer Portal da Revolut</a></li>
+                            <li>Navegue até <strong>Settings → APIs → Business API</strong></li>
+                            <li>Clique em <strong>"Add certificate"</strong></li>
+                            <li>Gere um par de chaves RSA:
+                                <pre><code>openssl genrsa -out private_key.pem 2048</code></pre>
+                            </li>
+                            <li>Extraia a chave pública:
+                                <pre><code>openssl rsa -in private_key.pem -pubout -out public_key.pem</code></pre>
+                            </li>
+                            <li>Cole a chave pública (X509) no painel da Revolut</li>
+                            <li>Use a chave privada neste formulário</li>
+                        </ol>
+                        <p><strong>Ou use o script automatizado:</strong></p>
+                        <pre><code>python3 scripts/generate_revolut_cert.py</code></pre>
+                    </div>
+                </div>
+                
+                <!-- Accounts Tab -->
+                <div id="accounts" class="tab-pane">
+                    <h2>Contas</h2>
+                    <button id="loadAccountsBtn" class="btn btn-primary">Carregar Contas</button>
+                    <div id="accountsList" class="cards-grid"></div>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div id="transactions" class="tab-pane">
+                    <h2>Transações</h2>
+                    <div class="form-group">
+                        <label for="accountId">ID da Conta (opcional):</label>
+                        <input type="text" id="accountId" placeholder="Deixe vazio para todas">
+                    </div>
+                    <button id="loadTransactionsBtn" class="btn btn-primary">Carregar Transações</button>
+                    <div id="transactionsList" class="table-container"></div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="payments" class="tab-pane">
+                    <h2>Criar Pagamento</h2>
+                    <form id="paymentForm" class="form-card">
+                        <div class="form-group">
+                            <label for="paymentAccountId">ID da Conta:</label>
+                            <input type="text" id="paymentAccountId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentAmount">Valor:</label>
+                            <input type="number" id="paymentAmount" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentCurrency">Moeda:</label>
+                            <select id="paymentCurrency" required>
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentCounterpartyId">ID da Contraparte:</label>
+                            <input type="text" id="paymentCounterpartyId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentReference">Referência:</label>
+                            <input type="text" id="paymentReference">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Criar Pagamento</button>
+                    </form>
+                    <div id="paymentResult" class="result-card"></div>
+                </div>
+
+                <!-- Counterparties Tab -->
+                <div id="counterparties" class="tab-pane">
+                    <h2>Contrapartes</h2>
+                    <button id="loadCounterpartiesBtn" class="btn btn-primary">Carregar Contrapartes</button>
+                    <div id="counterpartiesList" class="cards-grid"></div>
+                </div>
+
+                <!-- Exchange Rate Tab -->
+                <div id="exchange" class="tab-pane">
+                    <h2>Taxa de Câmbio</h2>
+                    <form id="exchangeForm" class="form-card">
+                        <div class="form-group">
+                            <label for="fromCurrency">De:</label>
+                            <select id="fromCurrency" required>
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="toCurrency">Para:</label>
+                            <select id="toCurrency" required>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="BRL">BRL</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Consultar Taxa</button>
+                    </form>
+                    <div id="exchangeResult" class="result-card"></div>
+                </div>
+            </div>
+        </main>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Carregando...</p>
+        </div>
+
+        <div id="error" class="error hidden"></div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
+
