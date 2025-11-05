@@ -16,15 +16,30 @@ export class RevolutAdapter {
     this.apiUrl = this.configService.get<string>("REVOLUT_API_URL");
     this.clientId = this.configService.get<string>("REVOLUT_CLIENT_ID");
 
+    // Try to get private key directly from environment variable first (for serverless)
+    const privateKeyEnv = this.configService.get<string>("REVOLUT_PRIVATE_KEY");
     const privateKeyPath = this.configService.get<string>(
       "REVOLUT_PRIVATE_KEY_PATH",
     );
 
-    try {
-      this.privateKey = fs.readFileSync(privateKeyPath, "utf8");
-    } catch (error) {
+    if (privateKeyEnv) {
+      // Use private key directly from environment variable
+      this.privateKey = privateKeyEnv;
+      this.logger.log("Using private key from environment variable");
+    } else if (privateKeyPath) {
+      // Fallback to reading from file (for local development)
+      try {
+        this.privateKey = fs.readFileSync(privateKeyPath, "utf8");
+        this.logger.log(`Private key loaded from ${privateKeyPath}`);
+      } catch (error) {
+        this.logger.warn(
+          `Could not read private key from ${privateKeyPath}. Some features may not work.`,
+        );
+        this.privateKey = null;
+      }
+    } else {
       this.logger.warn(
-        `Could not read private key from ${privateKeyPath}. Some features may not work.`,
+        "No private key configured (REVOLUT_PRIVATE_KEY or REVOLUT_PRIVATE_KEY_PATH). Some features may not work.",
       );
       this.privateKey = null;
     }
