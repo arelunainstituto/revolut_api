@@ -54,3 +54,6 @@ public_key.pem
 *~
 .tmp/
 temp/
+
+# Vercel
+.vercel

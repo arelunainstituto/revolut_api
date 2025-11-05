@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthService {
@@ -20,7 +20,7 @@ export class AuthService {
 
     // In production, validate against database
     if (!username || !password) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const payload = {
@@ -31,8 +31,8 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
-      token_type: 'Bearer',
-      expires_in: this.configService.get<string>('JWT_EXPIRES_IN') || '24h',
+      token_type: "Bearer",
+      expires_in: this.configService.get<string>("JWT_EXPIRES_IN") || "24h",
     };
   }
 
@@ -43,7 +43,7 @@ export class AuthService {
     try {
       return this.jwtService.verify(token);
     } catch (error) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException("Invalid token");
     }
   }
 
@@ -53,7 +53,7 @@ export class AuthService {
   async validateUser(payload: any) {
     // In production, validate user exists in database
     if (!payload || !payload.username) {
-      throw new UnauthorizedException('Invalid user');
+      throw new UnauthorizedException("Invalid user");
     }
 
     return {

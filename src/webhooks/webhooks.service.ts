@@ -1,6 +1,6 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as crypto from "crypto";
 
 @Injectable()
 export class WebhooksService {
@@ -8,7 +8,7 @@ export class WebhooksService {
   private readonly webhookSecret: string;
 
   constructor(private configService: ConfigService) {
-    this.webhookSecret = this.configService.get<string>('WEBHOOK_SECRET');
+    this.webhookSecret = this.configService.get<string>("WEBHOOK_SECRET");
   }
 
   /**
@@ -16,14 +16,14 @@ export class WebhooksService {
    */
   verifySignature(payload: string, signature: string): boolean {
     if (!this.webhookSecret) {
-      this.logger.warn('Webhook secret not configured');
+      this.logger.warn("Webhook secret not configured");
       return false;
     }
 
     const expectedSignature = crypto
-      .createHmac('sha256', this.webhookSecret)
+      .createHmac("sha256", this.webhookSecret)
       .update(payload)
-      .digest('hex');
+      .digest("hex");
 
     return crypto.timingSafeEqual(
       Buffer.from(signature),
@@ -39,24 +39,27 @@ export class WebhooksService {
 
     try {
       switch (event.event) {
-        case 'TransactionCreated':
+        case "TransactionCreated":
           return await this.handleTransactionCreated(event);
 
-        case 'TransactionStateChanged':
+        case "TransactionStateChanged":
           return await this.handleTransactionStateChanged(event);
 
-        case 'PaymentCreated':
+        case "PaymentCreated":
           return await this.handlePaymentCreated(event);
 
-        case 'PaymentStateChanged':
+        case "PaymentStateChanged":
           return await this.handlePaymentStateChanged(event);
 
         default:
           this.logger.warn(`Unknown event type: ${event.event}`);
-          return { status: 'unknown_event', event: event.event };
+          return { status: "unknown_event", event: event.event };
       }
     } catch (error) {
-      this.logger.error(`Error processing webhook: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error processing webhook: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -69,8 +72,8 @@ export class WebhooksService {
     // Implement your business logic here
     // Example: Store in database, send notifications, etc.
     return {
-      status: 'processed',
-      event: 'TransactionCreated',
+      status: "processed",
+      event: "TransactionCreated",
       transactionId: event.data.id,
     };
   }
@@ -84,8 +87,8 @@ export class WebhooksService {
     );
     // Implement your business logic here
     return {
-      status: 'processed',
-      event: 'TransactionStateChanged',
+      status: "processed",
+      event: "TransactionStateChanged",
       transactionId: event.data.id,
       newState: event.data.state,
     };
@@ -98,8 +101,8 @@ export class WebhooksService {
     this.logger.log(`Payment created: ${event.data.id}`);
     // Implement your business logic here
     return {
-      status: 'processed',
-      event: 'PaymentCreated',
+      status: "processed",
+      event: "PaymentCreated",
       paymentId: event.data.id,
     };
   }
@@ -113,8 +116,8 @@ export class WebhooksService {
     );
     // Implement your business logic here
     return {
-      status: 'processed',
-      event: 'PaymentStateChanged',
+      status: "processed",
+      event: "PaymentStateChanged",
       paymentId: event.data.id,
       newState: event.data.state,
     };
@@ -127,10 +130,10 @@ export class WebhooksService {
     return {
       configured: !!this.webhookSecret,
       supportedEvents: [
-        'TransactionCreated',
-        'TransactionStateChanged',
-        'PaymentCreated',
-        'PaymentStateChanged',
+        "TransactionCreated",
+        "TransactionStateChanged",
+        "PaymentCreated",
+        "PaymentStateChanged",
       ],
     };
   }

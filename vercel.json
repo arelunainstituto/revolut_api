@@ -1,6 +1,8 @@
 {
   "version": 2,
   "name": "revolut-api",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "builds": [
     {
       "src": "dist/main.js",
@@ -25,7 +27,13 @@
   "functions": {
     "dist/main.js": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/dist/main.js"
+    }
+  ]
 }

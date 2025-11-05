@@ -1,21 +1,21 @@
-import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import { AppModule } from './app.module';
+import { NestFactory } from "@nestjs/core";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { ValidationPipe } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { join } from "path";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
   // Serve static files from public directory
-  app.useStaticAssets(join(__dirname, '..', 'public'), {
-    prefix: '/',
+  app.useStaticAssets(join(__dirname, "..", "public"), {
+    prefix: "/",
   });
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
   });
 
@@ -29,21 +29,21 @@ async function bootstrap() {
   );
 
   // API prefix
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
 
   // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('Revolut API Integration')
-    .setDescription('AreLuna Revolut Business API Integration')
-    .setVersion('1.0.0')
-    .addTag('revolut', 'Revolut API endpoints')
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('webhooks', 'Webhook endpoints')
+    .setTitle("Revolut API Integration")
+    .setDescription("AreLuna Revolut Business API Integration")
+    .setVersion("1.0.0")
+    .addTag("revolut", "Revolut API endpoints")
+    .addTag("auth", "Authentication endpoints")
+    .addTag("webhooks", "Webhook endpoints")
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup("api/docs", app, document, {
     customCss: `
       .swagger-ui .opblock-body .opblock-description-wrapper input,
       .swagger-ui .opblock-body .opblock-description-wrapper textarea,
@@ -69,7 +69,7 @@ async function bootstrap() {
         color: #909090 !important;
       }
     `,
-    customSiteTitle: 'Revolut API Documentation',
+    customSiteTitle: "Revolut API Documentation",
   });
 
   const port = process.env.PORT || 3006;
@@ -82,7 +82,7 @@ async function bootstrap() {
 Server:      http://localhost:${port}
 API Docs:    http://localhost:${port}/api/docs
 Health:      http://localhost:${port}/api/health
-Environment: ${process.env.NODE_ENV || 'development'}
+Environment: ${process.env.NODE_ENV || "development"}
 ================================================================================
   `);
 }

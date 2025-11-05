@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import * as fs from "fs";
+import * as crypto from "crypto";
 
 @Injectable()
 export class RevolutAdapter {
@@ -13,15 +13,15 @@ export class RevolutAdapter {
   private readonly privateKey: string;
 
   constructor(private configService: ConfigService) {
-    this.apiUrl = this.configService.get<string>('REVOLUT_API_URL');
-    this.clientId = this.configService.get<string>('REVOLUT_CLIENT_ID');
+    this.apiUrl = this.configService.get<string>("REVOLUT_API_URL");
+    this.clientId = this.configService.get<string>("REVOLUT_CLIENT_ID");
 
     const privateKeyPath = this.configService.get<string>(
-      'REVOLUT_PRIVATE_KEY_PATH',
+      "REVOLUT_PRIVATE_KEY_PATH",
     );
 
     try {
-      this.privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+      this.privateKey = fs.readFileSync(privateKeyPath, "utf8");
     } catch (error) {
       this.logger.warn(
         `Could not read private key from ${privateKeyPath}. Some features may not work.`,
@@ -33,7 +33,7 @@ export class RevolutAdapter {
       baseURL: this.apiUrl,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -73,35 +73,35 @@ export class RevolutAdapter {
    */
   private generateJWT(): string {
     if (!this.privateKey) {
-      throw new Error('Private key not configured');
+      throw new Error("Private key not configured");
     }
 
     const header = {
-      alg: 'RS256',
-      typ: 'JWT',
+      alg: "RS256",
+      typ: "JWT",
     };
 
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       iss: this.clientId,
       sub: this.clientId,
-      aud: 'https://revolut.com',
+      aud: "https://revolut.com",
       iat: now,
       exp: now + 3600, // 1 hour expiration
     };
 
     const base64Header = Buffer.from(JSON.stringify(header)).toString(
-      'base64url',
+      "base64url",
     );
     const base64Payload = Buffer.from(JSON.stringify(payload)).toString(
-      'base64url',
+      "base64url",
     );
 
     const signatureInput = `${base64Header}.${base64Payload}`;
     const signature = crypto
-      .createSign('RSA-SHA256')
+      .createSign("RSA-SHA256")
       .update(signatureInput)
-      .sign(this.privateKey, 'base64url');
+      .sign(this.privateKey, "base64url");
 
     return `${signatureInput}.${signature}`;
   }
@@ -111,7 +111,7 @@ export class RevolutAdapter {
    */
   async getAccounts() {
     try {
-      const response = await this.axiosInstance.get('/accounts');
+      const response = await this.axiosInstance.get("/accounts");
       return response.data;
     } catch (error) {
       this.logger.error(`Error fetching accounts: ${error.message}`);
@@ -161,7 +161,7 @@ export class RevolutAdapter {
     limit?: number;
   }) {
     try {
-      const response = await this.axiosInstance.get('/transactions', {
+      const response = await this.axiosInstance.get("/transactions", {
         params,
       });
       return response.data;
@@ -193,7 +193,7 @@ export class RevolutAdapter {
    */
   async createPayment(paymentData: any) {
     try {
-      const response = await this.axiosInstance.post('/pay', paymentData);
+      const response = await this.axiosInstance.post("/pay", paymentData);
       return response.data;
     } catch (error) {
       this.logger.error(`Error creating payment: ${error.message}`);
@@ -206,7 +206,7 @@ export class RevolutAdapter {
    */
   async getCounterparties() {
     try {
-      const response = await this.axiosInstance.get('/counterparties');
+      const response = await this.axiosInstance.get("/counterparties");
       return response.data;
     } catch (error) {
       this.logger.error(`Error fetching counterparties: ${error.message}`);
@@ -220,7 +220,7 @@ export class RevolutAdapter {
   async createCounterparty(counterpartyData: any) {
     try {
       const response = await this.axiosInstance.post(
-        '/counterparty',
+        "/counterparty",
         counterpartyData,
       );
       return response.data;
@@ -239,7 +239,7 @@ export class RevolutAdapter {
       if (amount) {
         params.amount = amount;
       }
-      const response = await this.axiosInstance.get('/rate', { params });
+      const response = await this.axiosInstance.get("/rate", { params });
       return response.data;
     } catch (error) {
       this.logger.error(`Error fetching exchange rate: ${error.message}`);

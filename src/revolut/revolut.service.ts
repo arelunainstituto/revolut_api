@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RevolutAdapter } from './adapters/revolut.adapter';
+import { Injectable, Logger } from "@nestjs/common";
+import { RevolutAdapter } from "./adapters/revolut.adapter";
 
 @Injectable()
 export class RevolutService {
@@ -12,10 +12,10 @@ export class RevolutService {
    */
   async getAccounts() {
     try {
-      this.logger.log('Fetching all accounts');
+      this.logger.log("Fetching all accounts");
       return await this.revolutAdapter.getAccounts();
     } catch (error) {
-      this.logger.error('Failed to fetch accounts', error.stack);
+      this.logger.error("Failed to fetch accounts", error.stack);
       throw error;
     }
   }
@@ -59,10 +59,10 @@ export class RevolutService {
     limit?: number;
   }) {
     try {
-      this.logger.log('Fetching transactions', filters);
+      this.logger.log("Fetching transactions", filters);
       return await this.revolutAdapter.getTransactions(filters);
     } catch (error) {
-      this.logger.error('Failed to fetch transactions', error.stack);
+      this.logger.error("Failed to fetch transactions", error.stack);
       throw error;
     }
   }
@@ -88,10 +88,10 @@ export class RevolutService {
    */
   async createPayment(paymentData: any) {
     try {
-      this.logger.log('Creating payment', paymentData);
+      this.logger.log("Creating payment", paymentData);
       return await this.revolutAdapter.createPayment(paymentData);
     } catch (error) {
-      this.logger.error('Failed to create payment', error.stack);
+      this.logger.error("Failed to create payment", error.stack);
       throw error;
     }
   }
@@ -101,10 +101,10 @@ export class RevolutService {
    */
   async getCounterparties() {
     try {
-      this.logger.log('Fetching counterparties');
+      this.logger.log("Fetching counterparties");
       return await this.revolutAdapter.getCounterparties();
     } catch (error) {
-      this.logger.error('Failed to fetch counterparties', error.stack);
+      this.logger.error("Failed to fetch counterparties", error.stack);
       throw error;
     }
   }
@@ -114,10 +114,10 @@ export class RevolutService {
    */
   async createCounterparty(counterpartyData: any) {
     try {
-      this.logger.log('Creating counterparty', counterpartyData);
+      this.logger.log("Creating counterparty", counterpartyData);
       return await this.revolutAdapter.createCounterparty(counterpartyData);
     } catch (error) {
-      this.logger.error('Failed to create counterparty', error.stack);
+      this.logger.error("Failed to create counterparty", error.stack);
       throw error;
     }
   }
@@ -130,7 +130,7 @@ export class RevolutService {
       this.logger.log(`Fetching exchange rate: ${from} to ${to}`, { amount });
       return await this.revolutAdapter.getExchangeRate(from, to, amount);
     } catch (error) {
-      this.logger.error('Failed to fetch exchange rate', error.stack);
+      this.logger.error("Failed to fetch exchange rate", error.stack);
       throw error;
     }
   }
