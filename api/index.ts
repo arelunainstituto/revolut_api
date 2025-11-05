@@ -2,13 +2,13 @@ import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter } from "@nestjs/platform-express";
 import { ValidationPipe, INestApplication } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
-import * as express from "express";
+import express, { Express, Request, Response } from "express";
 import { AppModule } from "../src/app.module";
 
-const expressApp = express();
+const expressApp: Express = express();
 let cachedApp: INestApplication | null = null;
 
-async function bootstrap(): Promise<express.Express> {
+async function bootstrap(): Promise<Express> {
   if (cachedApp) {
     return expressApp;
   }
@@ -54,7 +54,7 @@ async function bootstrap(): Promise<express.Express> {
   return expressApp;
 }
 
-export default async (req: express.Request, res: express.Response) => {
+export default async (req: Request, res: Response) => {
   const app = await bootstrap();
   return app(req, res);
 };
