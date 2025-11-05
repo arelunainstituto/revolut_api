@@ -13,7 +13,7 @@
   },
   "regions": ["iad1"],
   "functions": {
-    "dist/main.js": {
+    "api/index.ts": {
       "memory": 1024,
       "maxDuration": 30
     }
@@ -21,7 +21,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/dist/main.js"
+      "destination": "/api"
     }
   ]
 }
