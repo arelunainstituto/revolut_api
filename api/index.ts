@@ -5,14 +5,14 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import express, { Express, Request, Response } from "express";
 import { AppModule } from "../src/app.module";
 
-const expressApp: Express = express();
-let cachedApp: INestApplication | null = null;
+let cachedServer: Express | null = null;
 
 async function bootstrap(): Promise<Express> {
-  if (cachedApp) {
-    return expressApp;
+  if (cachedServer) {
+    return cachedServer;
   }
 
+  const expressApp = express();
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter);
 
@@ -50,11 +50,11 @@ async function bootstrap(): Promise<Express> {
 
   await app.init();
 
-  cachedApp = app;
+  cachedServer = expressApp;
   return expressApp;
 }
 
 export default async (req: Request, res: Response) => {
-  const app = await bootstrap();
-  return app(req, res);
+  const server = await bootstrap();
+  server(req, res);
 };
